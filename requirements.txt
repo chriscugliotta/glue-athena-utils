@@ -1,0 +1,9 @@
+awswrangler
+boto3
+jinja2
+jupyter
+pandas
+pytest
+pytest-xdist
+PyYAML
+SQLAlchemy

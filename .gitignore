@@ -1,0 +1,10 @@
+*.db
+*.log
+
+.idea/
+.ipynb_checkpoints/
+.venv*/
+__pycache__/
+
+tests/data/temp/
+venv*/
