@@ -23,9 +23,7 @@ The `DatabaseConnection` class has two primary methods:  [`select`](/aws_utils/d
 - `select`:  Executes a SQL statement, and returns the query result as a Pandas dataframe.
 - `execute`:  Executes arbitrary SQL on the database, e.g. inserts, DDL commands, etc.
 
-Both methods are (optionally) augmented via [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) to enable easy and expressive query parameterization.  Sometimes this approach is called "Jinja SQL."
-
-For example, suppose we have a multi-tenant database, e.g. a single table contains data for multiple clients.  Suppose we're trying to load training data (for an ML model) across the clients.  However, imagine that each client has different data availability, and thus the query needs to be slightly customized for each client.  Here is an example of how Jinja SQL can help.
+Both methods are (optionally) augmented via [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) to enable easy and expressive query parameterization.  Sometimes this approach is called "Jinja SQL."  Here is an example:
 
 ```python
 from aws_utils.database.connection import DatabaseConnection
@@ -38,20 +36,17 @@ db = DatabaseConnection(
 
 params = {
     'schema': 'my_schema',
-    'clients': [
-        ('client1', '2020-01-01', '2020-12-31'),
-        ('client2', '2020-01-01', '2020-09-31'),
-        ('client3', '2021-01-01', '2021-12-31'),
-    ]
+    'job_ids': [100, 101, 102],
+    'limit': None,
 }
 
 sql = '''
 select *
 from {{schema}}.my_table
-where 1 = 1
-    {% for client, min_date, max_date in clients %}
-    and (client = '{{client}}' and sales_date between '{{min_date}}' and '{{max_date}}'){{ ' or' if not loop.last }}
-    {% endfor %}
+where job_id in ({{ job_ids | join(',') }})
+{% if limit is not none %}
+limit {{limit}}
+{% endif %}
 '''
 
 df = db.select(
@@ -65,18 +60,11 @@ This will execute the following query:
 ```sql
 select *
 from my_schema.my_table
-where 1 = 1
-    and (client = 'client1' and sales_date between '2020-01-01' and '2020-12-31') or
-    and (client = 'client2' and sales_date between '2020-01-01' and '2020-09-30') or
-    and (client = 'client3' and sales_date between '2021-01-01' and '2021-12-31')
+where job_id in (100,101,102)
 ```
 
-Admittedly, the Jinja template syntax is pretty ugly.  However, the improved expressivity is often worth the tradeoff.  It allows your queries to change dynamically with respect to runtime parameters.  See the [Query Mocking](#query-mocking) section for a particularly powerful example.
+Admittedly, the Jinja template syntax is pretty ugly.  However, the improved expressivity is often worth the tradeoff.
 
-> **NOTE:** You can use something like [J2Live](https://j2live.ttl255.com) to quickly validate template syntax.
+> **NOTE:** You can use something like [J2Live](https://j2live.ttl255.com) to quickly validate the template syntax.
 
-
-
-## Query Caching
-
-TODO.
+For example, suppose you maintain a standard SQL script, and suddenly need to accommodate a client customization, e.g. a loading filter that is only applicable to a single client.  In this case, consider modifying your standard script, i.e. use a Jinja `if` statement to conditionally inject the SQL `where` clause.  Perhaps this is ugly, but client customizations are always ugly, and this approach is a lot cleaner than forking your codebase for each client.
