@@ -1,13 +1,12 @@
 # aws-utils
 
-Productivity tools for AWS Glue and Athena.
-
-This library provides a class named [`DatabaseConnection`](aws_utils/database/connection.py), which provides a common interface to many database types, e.g. AWS Glue, SQLite, Oracle, etc.  This isn't an ORM.  It is a lightweight database abstraction layer that focuses on convenience and productivity.  **The target audience is people who prefer SQL over OOP**, in the context of tabular data processing.
+This library aims to improve developer experience (DX) and productivity with AWS Glue and Athena.  It contains several utilities that help streamline a Python/SQL workflow, with a focus on fast automated testing, automated schema updates, and overcoming AWS Athena's [update](https://stackoverflow.com/questions/71705848/aws-athena-update-table-rows-using-sql) and [100-partition](https://docs.aws.amazon.com/athena/latest/ug/ctas-insert-into.html) limitations.  **The target audience is people who prefer SQL over OOP** in the context of tabular data processing.
 
 
 
 # Contents
 
+- [Getting Started](#getting-started)
 - [Query Parameterization](#query-parameterization)
     - [Use Case](#use-case)
     - [Example](#example)
@@ -23,27 +22,54 @@ This library provides a class named [`DatabaseConnection`](aws_utils/database/co
 
 
 
-## Query Parameterization
+## Getting Started
 
-#### Use Case
+This library can be installed via pip:
 
-Suppose you maintain a standard SQL script, and suddenly need to accommodate a client customization, e.g. a loading filter that is only applicable to a single client.  In this case, consider using Jinja SQL to conditionally inject a `where` clause into your query.  This may seem ugly, but client customizations are always ugly, and this approach is a lot cleaner than forking your codebase for each client.
+```
+pip install git+https://github.com/chriscugliotta/aws-utils.git
+```
 
-#### Example
+This library introduces a class named [`DatabaseConnection`](aws_utils/database/connection.py) which has two primary methods:
 
-The `DatabaseConnection` class has two primary methods:  [`select`](/aws_utils/database/connection.py#L136) and [`execute`](/aws_utils/database/connection.py#L256).
+-  [`select`](/aws_utils/database/connection.py#L136):  Executes a SQL statement and returns the query result as a Pandas dataframe.
+- [`execute`](/aws_utils/database/connection.py#L256):  Executes arbitrary SQL on the database, e.g. inserts, DDL commands, etc.
 
-- `select`:  Executes a SQL statement, and returns the query result as a Pandas dataframe.
-- `execute`:  Executes arbitrary SQL on the database, e.g. inserts, DDL commands, etc.
-
-Both methods are (optionally) augmented via [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) to enable easy and expressive query parameterization.  Sometimes this approach is called "Jinja SQL."  Here is an example:
+Here is a syntax example:
 
 ```python
 from aws_utils.database.connection import DatabaseConnection
 
 db = DatabaseConnection(
     type='glue',
-    s3_database_prefix='s3://my-bucket/path/to/db',
+    name='my_db',
+    athena_workgroup='my-workgroup',
+)
+
+df = db.select(
+    sql='select * from my_table where job_id = {{job_id}}',
+    jinja_context={'job_id': 100}
+)
+```
+
+
+
+## Query Parameterization
+
+#### Use Case
+
+Suppose you maintain a standard SQL script, and suddenly need to accommodate a client customization, e.g. a loading filter that is only applicable to a single client.  In this case, consider using Jinja to conditionally inject a SQL `where` clause into your query.  This may seem ugly, but client customizations are always ugly, and this approach is a lot cleaner than forking your codebase for each client.
+
+#### Example
+
+The `DatabaseConnection` class can (optionally) use [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) to enable easy and expressive query parameterization.  Sometimes this approach is called "Jinja SQL."  Here is an example:
+
+```python
+from aws_utils.database.connection import DatabaseConnection
+
+db = DatabaseConnection(
+    type='glue',
+    name='my_db',
     athena_workgroup='my-workgroup',
 )
 
@@ -76,7 +102,7 @@ from my_schema.my_table
 where job_id in (100,101,102)
 ```
 
-Admittedly, the Jinja template syntax is pretty ugly.  However, the improved expressivity is often worth the tradeoff.
+Admittedly, the Jinja template syntax is pretty ugly.  However, the improved expressivity is sometimes worth the tradeoff.
 
 > **NOTE:** You can use something like [J2Live](https://j2live.ttl255.com) to quickly validate the template syntax.
 
@@ -108,7 +134,7 @@ def get_db(mode):
     if mode == 'fast':
         return DatabaseConnection(type='sqlite', url='path/to/my.db')
     else:
-        return DatabaseConnection(type='glue', s3_database_prefix='s3://my-bucket/path/to/db', athena_workgroup='my-workgroup')
+        return DatabaseConnection(type='glue', name='my_db', athena_workgroup='my-workgroup')
 
 sql = '''
 select *
