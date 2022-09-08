@@ -1,6 +1,6 @@
 # aws-utils
 
-This library aims to improve developer experience (DX) and productivity with AWS Glue and Athena.  It contains several utilities that help streamline a Python/SQL workflow, with a focus on fast automated testing, automated schema updates, and overcoming AWS Athena's [update](https://stackoverflow.com/questions/71705848/aws-athena-update-table-rows-using-sql) and [100-partition](https://docs.aws.amazon.com/athena/latest/ug/ctas-insert-into.html) limitations.  **The target audience is people who prefer SQL over OOP** in the context of tabular data processing.
+This library aims to improve developer experience (DX) and productivity with AWS Glue and Athena.  It contains several utilities that help streamline a Python/SQL workflow, with a focus on fast automated testing, automated schema migrations, and overcoming AWS Athena's [update](https://stackoverflow.com/questions/71705848/aws-athena-update-table-rows-using-sql) and [100-partition](https://docs.aws.amazon.com/athena/latest/ug/ctas-insert-into.html) limitations.  **The target audience is people who prefer SQL over OOP** in the context of tabular data processing.
 
 
 
@@ -154,3 +154,15 @@ df = db.select(sql=sql, jinja_context={'mode': mode})
 > **NOTE:** If you're worried about cluttering your SQL code with branching logic, keep in mind that Athena and SQLite syntax are nearly identical, so these branches are surprisingly rare.  Also, Jinja offers many tools to help refactor and re-use common Jinja snippets, such as [macros](https://ttl255.com/jinja2-tutorial-part-5-macros) or [global functions](https://stackoverflow.com/questions/6036082/call-a-python-function-from-jinja2), which can be used to reduce clutter.  
 
 > **NOTE:**  The `DatabaseConnection` class also provides [`insert`](/aws_utils/database/connection.py#L320) and [`delete`](/aws-utils/blob/master/aws_utils/database/connection.py#L411) methods which behave identically across Glue and SQLite.
+
+
+
+## Schema Migrations
+
+Not written yet.  For now, see the [`DatabaseMigrationService`](/aws_utils/database/migration.py) class, [unit test](/tests/database/test_migration.py), and [sample migrations](tests/data/resources/migrations).
+
+
+
+## Overcoming Athena Limitations
+
+Not written yet.  For now, see the [`backup_drop_rebuild`](/aws_utils/database/backup_drop_rebuild.py) module.
