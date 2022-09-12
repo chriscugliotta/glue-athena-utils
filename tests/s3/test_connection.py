@@ -11,7 +11,7 @@ def test_s3(s3, zip):
 
     # Get directory prefixes.
     dir_local = config.paths.tests / 'test_s3' / str(zip)
-    dir_remote = f'test_chris/aws_utils/test_s3/{zip}'
+    dir_remote = f'test_chris/glue_athena_utils/test_s3/{zip}'
 
     # Get file paths.
     paths = {

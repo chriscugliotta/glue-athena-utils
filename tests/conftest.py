@@ -10,8 +10,8 @@ path_repo = Path(__file__).absolute().parents[1]
 if str(path_repo) not in sys.path:
     sys.path.insert(0, str(path_repo))
 
-from aws_utils.database.connection import DatabaseConnection
-from aws_utils.s3.connection import S3Connection
+from glue_athena_utils.database.connection import DatabaseConnection
+from glue_athena_utils.s3.connection import S3Connection
 from tests.config import config
 log = logging.getLogger('cc_utils.conftest')
 

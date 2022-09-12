@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-    name='aws_utils',
+    name='glue_athena_utils',
     version='1.0',
-    packages=['aws_utils'],
-    package_data={'aws_utils': ['*', '*/*', '*/*/*']},
+    packages=['glue_athena_utils'],
+    package_data={'glue_athena_utils': ['*', '*/*', '*/*/*']},
 )

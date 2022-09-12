@@ -12,7 +12,7 @@ from botocore.exceptions import ClientError
 from pandas import DataFrame
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
-from aws_utils.s3.connection import S3Connection
+from glue_athena_utils.s3.connection import S3Connection
 log = logging.getLogger(__name__)
 
 

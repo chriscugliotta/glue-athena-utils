@@ -1,5 +1,5 @@
 import pytest
-from aws_utils.database.migration import DatabaseMigrationService
+from glue_athena_utils.database.migration import DatabaseMigrationService
 
 
 @pytest.mark.parametrize('db_id', ['sqlite', 'glue'])

@@ -1,4 +1,4 @@
-# aws-utils
+# glue-athena-utils
 
 This library aims to improve developer experience (DX) and productivity with AWS Glue and Athena.  It contains several utilities that help streamline a Python/SQL workflow, with a focus on fast automated testing, automated schema migrations, and overcoming AWS Athena's [update](https://stackoverflow.com/questions/71705848/aws-athena-update-table-rows-using-sql) and [100-partition](https://docs.aws.amazon.com/athena/latest/ug/ctas-insert-into.html) limitations.  **The target audience is people who prefer SQL over OOP** in the context of data processing.
 
@@ -27,18 +27,18 @@ This library aims to improve developer experience (DX) and productivity with AWS
 This library can be installed via pip:
 
 ```
-pip install git+https://github.com/chriscugliotta/aws-utils.git
+pip install git+https://github.com/chriscugliotta/glue-athena-utils.git
 ```
 
-This library introduces a class named [`DatabaseConnection`](aws_utils/database/connection.py) which has two primary methods:
+This library introduces a class named [`DatabaseConnection`](/glue_athena_utils/database/connection.py) which has two primary methods:
 
-- [`select`](/aws_utils/database/connection.py#L136):  Executes a SQL statement and returns the query result as a Pandas dataframe.
-- [`execute`](/aws_utils/database/connection.py#L256):  Executes arbitrary SQL on the database, e.g. inserts, DDL commands, etc.
+- [`select`](/glue_athena_utils/database/connection.py#L136):  Executes a SQL statement and returns the query result as a Pandas dataframe.
+- [`execute`](/glue_athena_utils/database/connection.py#L256):  Executes arbitrary SQL on the database, e.g. inserts, DDL commands, etc.
 
 Here is a syntax example:
 
 ```python
-from aws_utils.database.connection import DatabaseConnection
+from glue_athena_utils.database.connection import DatabaseConnection
 
 db = DatabaseConnection(
     type='glue',
@@ -65,7 +65,7 @@ Suppose you maintain a standard SQL script, and suddenly need to accommodate a c
 The `DatabaseConnection` class can (optionally) use [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/) to enable easy and expressive query parameterization.  Sometimes this approach is called "Jinja SQL."  Here is an example:
 
 ```python
-from aws_utils.database.connection import DatabaseConnection
+from glue_athena_utils.database.connection import DatabaseConnection
 
 db = DatabaseConnection(
     type='glue',
@@ -129,7 +129,7 @@ So, slow tests can target the (real) Glue database, whereas fast tests can be re
 #### Example
 
 ```python
-from aws_utils.database.connection import DatabaseConnection
+from glue_athena_utils.database.connection import DatabaseConnection
 
 def get_db(mode):
     if mode == 'fast':
@@ -154,13 +154,13 @@ df = db.select(sql=sql, jinja_context={'mode': mode})
 
 > **NOTE:** If you're worried about cluttering your SQL code with branching logic, keep in mind that Athena and SQLite syntax are nearly identical, so these branches are surprisingly rare.  Also, Jinja offers many tools to help refactor and re-use common Jinja snippets, such as [macros](https://ttl255.com/jinja2-tutorial-part-5-macros) or [global functions](https://stackoverflow.com/questions/6036082/call-a-python-function-from-jinja2), which can be used to reduce clutter.
 
-> **NOTE:**  The `DatabaseConnection` class also provides [`insert`](/aws_utils/database/connection.py#L320) and [`delete`](/aws-utils/blob/master/aws_utils/database/connection.py#L411) methods which behave identically across Glue and SQLite.
+> **NOTE:**  The `DatabaseConnection` class also provides [`insert`](/glue_athena_utils/database/connection.py#L320) and [`delete`](/glue_athena_utils/database/connection.py#L411) methods which behave identically across Glue and SQLite.
 
 
 
 ## Schema Migrations
 
-Not written yet.  For now, see the [`DatabaseMigrationService`](/aws_utils/database/migration.py) class, [unit test](/tests/database/test_migration.py), and [sample migrations](tests/data/resources/migrations).
+Not written yet.  For now, see the [`DatabaseMigrationService`](/glue_athena_utils/database/migration.py) class, [unit test](/tests/database/test_migration.py), and [sample migrations](tests/data/resources/migrations).
 
 
 
@@ -178,7 +178,7 @@ If you're reading all of this, you might be thinking that my grievances are unre
 
 #### Example
 
-This library introduces a function named [`backup_drop_rebuild`](/aws_utils/database/backup_drop_rebuild.py) to overcome the limitations above.  It can be used to update, delete from, or arbitrarily modify an existing Glue table *and* the underlying data files on S3.  This is best explained with an example.
+This library introduces a function named [`backup_drop_rebuild`](/glue_athena_utils/database/backup_drop_rebuild.py) to overcome the limitations above.  It can be used to update, delete from, or arbitrarily modify an existing Glue table *and* the underlying data files on S3.  This is best explained with an example.
 
 Suppose we have a Glue table named `job` that looks like this:
 
@@ -201,12 +201,12 @@ alter table job add column elapsed_time int;
 update job set elapsed_time = (end_time - start_time) * 24 * 60 * 60;
 ```
 
-This isn't possible out-of-the-box with Athena SQL.  However, the [`backup_drop_rebuild`](/aws_utils/database/backup_drop_rebuild.py) function provides an elegant interface for achieving the same result:
+This isn't possible out-of-the-box with Athena SQL.  However, the [`backup_drop_rebuild`](/glue_athena_utils/database/backup_drop_rebuild.py) function provides an elegant interface for achieving the same result:
 
 ```python
 from pathlib import Path
-from aws_utils.database.backup_drop_rebuild import backup_drop_rebuild
-from aws_utils.database.connection import DatabaseConnection
+from glue_athena_utils.database.backup_drop_rebuild import backup_drop_rebuild
+from glue_athena_utils.database.connection import DatabaseConnection
 
 db = DatabaseConnection(
     type='glue',
@@ -237,4 +237,4 @@ This code will perform the following steps:
 
 So basically, you just need to express your update/delete/alter logic in terms of  `create_sql` and `insert_sql` statements, and then the library will handle everything else.  This approach is both flexible and easy-to-use.
 
-See the [docstrings](/aws_utils/database/backup_drop_rebuild.py#L30) for more information.  Also, see the [unit test](/tests/database/test_migration.py) and [sample migrations](/tests/data/resources/migrations) for a working example.
+See the [docstrings](/glue_athena_utils/database/backup_drop_rebuild.py#L30) for more information.  Also, see the [unit test](/tests/database/test_migration.py) and [sample migrations](/tests/data/resources/migrations) for a working example.

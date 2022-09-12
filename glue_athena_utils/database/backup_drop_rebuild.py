@@ -2,7 +2,7 @@ import awswrangler as wr
 import logging
 from pathlib import Path
 from typing import Any, Dict, List
-from aws_utils.database.connection import DatabaseConnection
+from glue_athena_utils.database.connection import DatabaseConnection
 log = logging.getLogger(__name__)
 
 

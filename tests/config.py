@@ -61,7 +61,7 @@ class Config:
                 },
             },
             'loggers': {
-                'aws_utils': {
+                'glue_athena_utils': {
                     'level': 'DEBUG',
                     'handlers': ['console', 'file'],
                 },
@@ -74,7 +74,7 @@ class ConfigPaths:
 
     def __init__(self):
         self.repo = Path(__file__).absolute().parents[1]
-        self.package = self.repo / 'aws_utils'
+        self.package = self.repo / 'glue_athena_utils'
         self.migrations = self.repo / 'tests' / 'data' / 'resources' / 'migrations'
         self.sql = self.repo / 'tests' / 'data' / 'resources' / 'sql'
         self.logs = self.repo / 'tests' / 'data' / 'temp' / 'logs'

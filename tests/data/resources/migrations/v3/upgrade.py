@@ -1,4 +1,4 @@
-from aws_utils.database.backup_drop_rebuild import backup_drop_rebuild
+from glue_athena_utils.database.backup_drop_rebuild import backup_drop_rebuild
 
 
 
